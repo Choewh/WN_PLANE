@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{C366DF88-4BF9-6898-320C-0DA21D2F3D00}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "WN_PLANE",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
