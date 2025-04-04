@@ -22,6 +22,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetBoost(bool bEnabled);
 
 protected:
 	void OnLook(const FInputActionValue& InputActionValue);
@@ -30,5 +32,6 @@ protected:
 	void OnSpeedReset(const FInputActionValue& InputActionValue);
 
 protected:
+
 	UInputMappingContext* IMC_Default = nullptr;
 };

@@ -369,7 +369,7 @@ vcpkg_installed/
 /Binaries/
 /Build/
 /WN_PLANE.sln
-
+/Package/
 # Rider user specific files
 .idea/
 /Plugins/Developer/RiderLink

@@ -20,8 +20,16 @@ void APlayerPlaneController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	Subsystem->AddMappingContext(IMC_Default, 0);
+	if (IsLocalController())
+	{
+		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				Subsystem->AddMappingContext(IMC_Default, 0);
+			}
+		}
+	}
 }
 
 void APlayerPlaneController::SetupInputComponent()
@@ -48,15 +56,15 @@ void APlayerPlaneController::SetupInputComponent()
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("IA_LeftClick is disabled"));
 	//}
-	
-	if (const UInputAction* InputAction = FUtils::GetInputActionFromName(IMC_Default, TEXT("IA_RightClick")))
+
+	if (const UInputAction* InputAction = FUtils::GetInputActionFromName(IMC_Default, TEXT("IA_Boost")))
 	{
 		EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Started, this, &ThisClass::OnSpeedUp);
 		EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Completed, this, &ThisClass::OnSpeedReset);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("IA_RightClick is disabled"));
+		UE_LOG(LogTemp, Warning, TEXT("IA_Boost is disabled"));
 	}
 }
 
@@ -71,18 +79,28 @@ void APlayerPlaneController::OnLook(const FInputActionValue& InputActionValue)
 void APlayerPlaneController::OnLeftClick(const FInputActionValue& InputActionValue)
 {
 	//공격 총알 ? / 자체 쿨?
-	//UE_LOG(LogTemp, Warning, TEXT("OnLeftClick"));
+	//UE_LOG(LogTemp, Warning, TEXT("OnLeftClick"));	
+}
+
+void APlayerPlaneController::Server_SetBoost_Implementation(bool bEnabled)
+{
+	if (!PlayerState)
+	{
+		return;
+	}
+	APlayerPlaneState* PlayerPlaneState = GetPlayerState<APlayerPlaneState>();
+	if (PlayerPlaneState)
+	{
+		PlayerPlaneState->SetBoost(bEnabled);
+	}
 }
 
 
 void APlayerPlaneController::OnSpeedUp(const FInputActionValue& InputActionValue)
 {
-	//속력업 , 스태미나 감소
-	APlayerPlaneState* PlayerPlaneState = GetPlayerState<APlayerPlaneState>();
-	PlayerPlaneState->SetBoost(true);
+	Server_SetBoost(true);
 }
 void APlayerPlaneController::OnSpeedReset(const FInputActionValue& InputActionValue)
 {
-	APlayerPlaneState* PlayerPlaneState = GetPlayerState<APlayerPlaneState>();
-	PlayerPlaneState->SetBoost(false);
+	Server_SetBoost(false);
 }

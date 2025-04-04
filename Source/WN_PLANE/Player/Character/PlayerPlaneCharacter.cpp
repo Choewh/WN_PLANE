@@ -33,17 +33,16 @@ APlayerPlaneCharacter::APlayerPlaneCharacter()
 	PlayerCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	{
-		TempMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-		TempMesh->SetupAttachment(RootComponent);
+		StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+		StaticMeshComponent->SetupAttachment(RootComponent);
 
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/Plane/Plane.Plane'"));
 
 		if (MeshAsset.Succeeded())
 		{
-			TempMesh->SetStaticMesh(MeshAsset.Object);
-			TempMesh->SetWorldScale3D(FVector(1.f, 3.f, 1.f));
+			StaticMeshComponent->SetStaticMesh(MeshAsset.Object);
 		}
-		TempMesh->SetIsReplicated(true);
+		StaticMeshComponent->SetIsReplicated(true);
 	}
 
 	{
@@ -62,9 +61,8 @@ APlayerPlaneCharacter::APlayerPlaneCharacter()
 		PlayerCamera->SetRelativeRotation(FRotator(-15.f, 0.f, 0.f));
 		PlayerCamera->bUsePawnControlRotation = true; // Camera does not rotate relative to arm
 	}
-
-	TEnumAsByte<EAutoReceiveInput::Type> tempAutoPossessPlayer(1);
-	AutoPossessPlayer = tempAutoPossessPlayer;
+	//TEnumAsByte<EAutoReceiveInput::Type> tempAutoPossessPlayer(1);
+	//AutoPossessPlayer = tempAutoPossessPlayer;
 }
 
 // Called when the game starts or when spawned
@@ -79,14 +77,16 @@ void APlayerPlaneCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	OnPlaneMove();
+	if (IsLocallyControlled())
+	{
+		OnPlaneMove(); // 클라에서 직접 AddMovementInput 호출
+	}
 }
 
-// Called to bind functionality to input
-void APlayerPlaneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void APlayerPlaneCharacter::Server_OnPlaneMove_Implementation()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	// 서버에서 처리
+	OnPlaneMove();
 }
 
 void APlayerPlaneCharacter::OnPlaneMove()
@@ -106,5 +106,12 @@ void APlayerPlaneCharacter::OnPlaneMove()
 		GetCharacterMovement()->MaxFlySpeed = 600.f;
 		AddMovementInput(ForwardVector, PlayerPlaneState->GetSpeed());
 	}
+}
+
+// Called to bind functionality to input
+void APlayerPlaneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 }
 

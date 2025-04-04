@@ -32,7 +32,10 @@ public:
 
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* TempMesh;
+	UStaticMeshComponent* StaticMeshComponent;
+
+	UFUNCTION(Server, Reliable)
+	void Server_OnPlaneMove();
 
 public:	
 	// Called every frame
@@ -42,6 +45,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	UFUNCTION()
 	virtual void OnPlaneMove();
 
 };
